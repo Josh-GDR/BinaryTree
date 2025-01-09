@@ -30,16 +30,13 @@ class Tree
 
     private def Insert(value, actNode = @root)        
         if value == actNode.value
-            puts '<-------->'
             return
         end
 
         if actNode < value
-            puts '->'
             actNode.rightNode = Node.newNode(value) if actNode.rightNode.nil?
             Insert(value, actNode.rightNode)
         elsif actNode > value 
-            puts '<-'
             actNode.leftNode = Node.newNode(value) if actNode.leftNode.nil?
             Insert(value, actNode.leftNode)
         end
@@ -48,6 +45,95 @@ class Tree
     def delete(value) 
         return if @root.nil?
 
+        prevNode = findFatherOf(value, @root)
+        if prevNode.nil? and @root == value
+            removeRoot
+            return
+        end
+
+        actNode = findNode(value, prevNode)
+
+        if actNode.isLeaf?
+            removeLeaf(prevNode, value)
+        elsif !actNode.leftNode.nil?
+            actNode.value = getRightest(actNode.leftNode, actNode)
+        elsif !actNode.rightNode.nil?
+            actNode.value = getLeftest(actNode.rightNode, actNode)            
+        end
     end
+
+    private def removeLeaf(fatherNode, value)
+        if fatherNode > value
+            fatherNode.leftNode = nil
+        else
+            fatherNode.rightNode = nil
+        end
+    end
+
+    private def removeRoot
+        if @root.isLeaf?
+            @root = nil
+        elsif !@root.leftNode.nil?
+            @root.value = getRightest(@root.leftNode, @root)
+        elsif !@root.rightNode.nil?
+            @root.value = getLeftest(@root.rightNode, @root)
+        end
+    end
+
+    private def getLeftest(actNode, prevNode)
+        return getLeftest(actNode.leftNode, actNode) unless actNode.leftNode.nil?
+        
+        value = actNode.value
+        if actNode.isLeaf?
+            removeLeaf(prevNode, actNode.value)
+        elsif
+            delete(actNode.value)
+        end
+        return value
+    end
+
+    private def getRightest(actNode, prevNode)
+        return getRightest(actNode.rightNode, actNode) unless actNode.rightNode.nil?
+
+        value = actNode.value
+        if actNode.isLeaf?
+            removeLeaf(prevNode, actNode.value)
+        else
+            delete(actNode.value)
+        end
+        return value
+    end
+
+    private def findFatherOf(value, actNode) 
+        return nil if actNode.nil?
+
+        if actNode > value 
+            return actNode if not actNode.leftNode.nil? and actNode.leftNode == value
+            findNode(value, actNode.leftNode) 
+        elsif actNode < value
+            return actNode if not actNode.rightNode.nil? and actNode.rightNode == value
+            findNode(value, actNode.rightNode)
+        end
+    end
+
+    def findNode(value, actNode = @root) 
+        return nil if actNode.nil?
+
+        return actNode if actNode == value 
+
+        if actNode > value 
+            findNode(value, actNode.leftNode) 
+        elsif actNode < value
+            findNode(value, actNode.rightNode)
+        end
+    end
+
+    def printInorder(actNode = @root)
+        return if actNode.nil?
+
+        printInorder(actNode.leftNode)
+        puts "['#{actNode.value}'] "
+        printInorder(actNode.rightNode)
+    end 
 
 end

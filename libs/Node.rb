@@ -14,6 +14,10 @@ class Node
     node
   end
 
+  def isLeaf?
+    return (@leftNode.nil? and @rightNode.nil?)
+  end
+
   def GetValueType 
     @value.class
   end
