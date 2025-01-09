@@ -2,12 +2,20 @@ require_relative './Node.rb'
 
 class Tree
     @root
+    @AVL_Tree_Mode
 
-    def initialize
+    def initialize(balance = true)
         @root = nil
+        @AVL_Tree_Mode = balance
     end
 
     def self.BuildTree(elementArray)
+        tree = Tree.new(false)
+        elementArray.each { |element| tree.insert(element) }
+        tree
+    end
+
+    def self.BuildBalancedTree(elementArray)
         tree = Tree.new
         elementArray.each { |element| tree.insert(element) }
         tree
@@ -26,6 +34,9 @@ class Tree
         end
 
         Insert(value)
+        if (@AVL_Tree_Mode and balanced?)
+            rebalance
+        end
     end
 
     private def Insert(value, actNode = @root)        
@@ -42,7 +53,14 @@ class Tree
         end
     end
 
-    def delete(value) 
+    def remove(value)
+        delete(value)
+        if (@AVL_Tree_Mode and balanced?)
+            rebalance
+        end
+    end
+
+    private def delete(value) 
         return if @root.nil?
 
         prevNode = findFatherOf(value, @root)
@@ -60,6 +78,7 @@ class Tree
         elsif !actNode.rightNode.nil?
             actNode.value = getLeftest(actNode.rightNode, actNode)            
         end
+        
     end
 
     private def removeLeaf(fatherNode, value)
@@ -130,15 +149,15 @@ class Tree
 
     def height(value)
         treeBranch = findNode(value)
-        return if treeBranch.nil?
+        return -1 if treeBranch.nil?
+        return 0 if treeBranch.isLeaf?
         
         queue = Queue.new
         
         queue.push(treeBranch)
-        height = -1
+        height = 0
         until queue.empty? do
             iterations = queue.length
-            height = height + 1
             
             for i in (0...iterations)
                 node = queue.pop
@@ -146,20 +165,53 @@ class Tree
                 queue.push(node.leftNode) unless node.leftNode.nil?
                 queue.push(node.rightNode) unless node.rightNode.nil?
             end
+            height = height + 1
         end
         
         height
     end
 
     def depth(value, actNode = @root)
-        return -1 unless @actNode.nil? #The value doesn't exist
+        return -1 if actNode.nil? #The value doesn't exist
         return 0 if actNode == value #The value was found
 
         if actNode > value 
-            1 + depth(value, actNode.leftNode) 
+            val = depth(value, actNode.leftNode) 
+            return val >= 0 ? 1 + val : -1
         elsif actNode < value
-            1 + depth(value, actNode.rightNode)
+            val = depth(value, actNode.rightNode)
+            return val >= 0 ? 1 + val : -1
         end
+    end
+
+    def balanced?(symb = :bool)
+        return true if @root.nil? and @root.isLeaf?
+        leftSubtree = @root.leftNode.nil? ? 0 : height(@root.leftNode.value)
+        rightSubtree = @root.rightNode.nil? ? 0 : height(@root.rightNode.value)
+        product = leftSubtree - rightSubtree
+        
+        if symb == :bool
+            return (product >= -1 and product <= 1)        
+        elsif symb == :product
+            return product
+        end
+    end
+
+    def rebalance
+        product = balanced?(:product)
+
+        if (product > 1)
+            auxVal = @root.value
+            @root.value = getRightest(@root.leftNode, @root)
+            insert(auxVal)
+            rebalance
+        elsif product < -1
+            auxVal = @root.value
+            @root.value = getRightest(@root.rightNode, @root)
+            insert(auxVal)
+            rebalance
+        end
+        
     end
 
     def printInorder(actNode = @root)
@@ -169,5 +221,11 @@ class Tree
         puts "['#{actNode.value}'] "
         printInorder(actNode.rightNode)
     end
+
+    def pretty_print(node = @root, prefix = '', is_left = true)
+        pretty_print(node.rightNode, "#{prefix}#{is_left ? '│   ' : '    '}", false) if node.rightNode
+        puts "#{prefix}#{is_left ? '└── ' : '┌── '}#{node.value}"
+        pretty_print(node.leftNode, "#{prefix}#{is_left ? '    ' : '│   '}", true) if node.leftNode
+      end
 
 end
