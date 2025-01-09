@@ -128,12 +128,61 @@ class Tree
         end
     end
 
+    def height(value)
+        treeBranch = findNode(value)
+        return if treeBranch.nil?
+        
+        queue = Queue.new
+        
+        queue.push(treeBranch)
+        height = -1
+        until queue.empty? do
+            iterations = queue.length
+            height = height + 1
+            
+            for i in (0...iterations)
+                node = queue.pop
+                
+                queue.push(node.leftNode) unless node.leftNode.nil?
+                queue.push(node.rightNode) unless node.rightNode.nil?
+            end
+        end
+        
+        height
+    end
+
+    def depth(value)
+        return if @root.nil?
+        
+        queue = Queue.new
+        
+        queue.push(@root)
+        height = 0
+        until queue.empty? do
+            iterations = queue.length
+            
+            for i in (0...iterations)
+                node = queue.pop
+                
+                if node == value
+                    return height
+                end
+                
+                queue.push(node.leftNode) unless node.leftNode.nil?
+                queue.push(node.rightNode) unless node.rightNode.nil?
+            end
+
+            height = height + 1
+        end
+
+    end
+
     def printInorder(actNode = @root)
         return if actNode.nil?
 
         printInorder(actNode.leftNode)
         puts "['#{actNode.value}'] "
         printInorder(actNode.rightNode)
-    end 
+    end
 
 end
