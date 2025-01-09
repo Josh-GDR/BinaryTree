@@ -151,30 +151,15 @@ class Tree
         height
     end
 
-    def depth(value)
-        return if @root.nil?
-        
-        queue = Queue.new
-        
-        queue.push(@root)
-        height = 0
-        until queue.empty? do
-            iterations = queue.length
-            
-            for i in (0...iterations)
-                node = queue.pop
-                
-                if node == value
-                    return height
-                end
-                
-                queue.push(node.leftNode) unless node.leftNode.nil?
-                queue.push(node.rightNode) unless node.rightNode.nil?
-            end
+    def depth(value, actNode = @root)
+        return -1 unless @actNode.nil? #The value doesn't exist
+        return 0 if actNode == value #The value was found
 
-            height = height + 1
+        if actNode > value 
+            1 + depth(value, actNode.leftNode) 
+        elsif actNode < value
+            1 + depth(value, actNode.rightNode)
         end
-
     end
 
     def printInorder(actNode = @root)
