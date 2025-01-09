@@ -12,10 +12,3 @@ puts "balance: '#{tree.balanced?}'"
 puts "balance: '#{tree.balanced?(:product)}'"
 p '<=======>'
 tree.pretty_print
-
-
-# to do
-# level_order {yield on each block and returns the value if the func is true}
-# inorder yielding
-# preorder yielding
-# postorder yielding

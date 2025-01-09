@@ -214,6 +214,76 @@ class Tree
         
     end
 
+    def preorder(actNode = @root, array = Array.new, &block)
+        return array if actNode.nil?
+
+        if not block_given?
+        array << actNode.value 
+        elsif yield(actNode.value)
+            array << actNode.value
+        end
+        preorder(actNode.leftNode, array, &block) unless actNode.leftNode.nil?
+        preorder(actNode.rightNode, array, &block) unless actNode.rightNode.nil?
+
+        array
+    end
+
+
+    def inorder(actNode = @root, array = Array.new, &block)
+        return array if actNode.nil?
+
+        inorder(actNode.leftNode, array, &block) unless actNode.leftNode.nil?
+        if not block_given?
+        array << actNode.value 
+        elsif yield(actNode.value)
+            array << actNode.value
+        end
+        inorder(actNode.rightNode, array, &block) unless actNode.rightNode.nil?
+
+        array
+    end
+
+    def postorder(actNode = @root, array = Array.new, &block)
+        return array if actNode.nil?
+
+        postorder(actNode.leftNode, array, &block) unless actNode.leftNode.nil?
+        postorder(actNode.rightNode, array, &block) unless actNode.rightNode.nil?
+        if not block_given?
+        array << actNode.value 
+        elsif yield(actNode.value)
+            array << actNode.value
+        end
+
+        array
+    end
+
+    def levelOrder
+        return [] if @root.nil?
+        
+        queue = Queue.new
+        queue.push(@root)
+        array = Array.new
+
+        until queue.empty? do
+            iterations = queue.length
+            
+            for i in (0...iterations)
+                node = queue.pop
+                
+                if yield(node.value)
+                    array << node.value
+                elsif not block_given?
+                    array << node.value
+                end
+
+                queue.push(node.leftNode) unless node.leftNode.nil?
+                queue.push(node.rightNode) unless node.rightNode.nil?
+            end
+        end
+        
+        array
+    end
+
     def printInorder(actNode = @root)
         return if actNode.nil?
 
@@ -226,6 +296,6 @@ class Tree
         pretty_print(node.rightNode, "#{prefix}#{is_left ? '│   ' : '    '}", false) if node.rightNode
         puts "#{prefix}#{is_left ? '└── ' : '┌── '}#{node.value}"
         pretty_print(node.leftNode, "#{prefix}#{is_left ? '    ' : '│   '}", true) if node.leftNode
-      end
+    end
 
 end
